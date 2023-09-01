@@ -1,0 +1,54 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define ONE_WIRE_BUS 2 // Pino de dados do sensor de temperatura
+
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+void setup() {
+  // Inicialize o sensor de temperatura
+  sensors.begin();
+  
+  // Inicialize o display OLED
+  if(!display.begin(SSD1306_I2C_ADDRESS, OLED_RESET)) {
+    Serial.println(F("Erro ao inicializar o display OLED"));
+    while(true);
+  }
+  
+  // Limpe a tela
+  display.clearDisplay();
+  display.display();
+  
+  // Configurações iniciais
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+}
+
+void loop() {
+  // Leitura da temperatura
+  sensors.requestTemperatures();
+  float temperaturaCelsius = sensors.getTempCByIndex(0);
+  float temperaturaFahrenheit = temperaturaCelsius * 1.8 + 32;
+
+  // Exibir a temperatura no display
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print(F("Temperatura:"));
+  display.setCursor(0, 10);
+  display.print(temperaturaCelsius);
+  display.print(F("°C"));
+  display.setCursor(0, 20);
+  display.print(temperaturaFahrenheit);
+  display.print(F("°F"));
+  display.display();
+
+  delay(1000); // Aguardar 1 segundo antes de atualizar novamente
+}
